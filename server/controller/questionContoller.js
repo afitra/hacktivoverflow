@@ -8,69 +8,68 @@ class Controller {
         var validasi = jwt.verify(req.headers.token)
         var ID = ''
         var trueVote = false
-        var arr = []
-        var index = ''
-        var temp = ''
+        // console.log(req.body.questionId);
         User.findOne({
                 email: validasi.email
             })
             .then(data => {
-                // console.log(req.params, '==kkkkkk');
                 ID = data._id
-                return Model.findOne({
-                    _id: req.params.id
+                console.log(ID);
+
+                return Model.findOneAndUpdate({
+                    _id: req.body.questionId
+                }, {
+                    $pullAll: {
+                        upVote: [ID]
+                    }
+                }, {
+                    new: true
                 })
+
             })
             .then(data => {
-                for (var i = 0; i < data.upVote.length; i++) {
-                    if (String(data.upVote[i]._id) === String(ID)) {
+                return Model.findOne({
+                    _id: req.body.questionId
+                })
+
+            })
+            .then(data => {
+                // res.status(200).json(data)
+                // console.log(data);
+                for (var i = 0; i < data.downVote.length; i++) {
+                    // console.log((data.downVote[i]._id), '===');
+                    // console.log(ID);
+
+                    // console.log();
+
+                    if (String(ID) == String(data.downVote[i]._id)) {
+                        // console.log(ID, 'ini ID NYA');
+                        // console.log(data.downVote[i]);
+                        // console.log('-------------------------------');
+
                         trueVote = true
-                        if (i == 0) {
-                            index = -1
-                            break
-                        } else {
-                            index = i
-                            break
-                        }
                     }
                 }
-                // temp = data.upVote.filter(word => word == String(ID))
-
-                // =============================================sampek sisi
+                // console.log(trueVote);
                 if (trueVote == true) {
-                    console.log('ini temp', temp);
-
-                    Model.findOneAndUpdate({
-                            _id: ID
-                        }, {
-                            upVote: temp
-                        })
-                        .then(data => {
-                            // console.log(index, 'kkkkkkkkk');
-                            // console.log(data);
-
-                        })
-                        .catch(err => {
-                            console.log(err);
-
-                        })
-
+                    throw new Error("BROKEN")
                 } else {
-                    console.log('masok else=======');
                     return Model.findOneAndUpdate({
-                        _id: req.params.id
+                        _id: req.body.questionId
                     }, {
                         $push: {
-                            downVote: ID
+                            downVote: [ID]
                         }
+                    }, {
+                        new: true
                     })
+
                 }
             })
             .then(data => {
                 res.status(200).json(data)
-                console.log(data);
-
             })
+
             .catch(err => {
                 res.status(500).json({
                     messege: err.message
@@ -79,57 +78,10 @@ class Controller {
 
 
 
+
     }
 
-    // static downvotePost(req, res) {
-    //     let flagUp = true
-    //     Model
-    //         .findById(req.params.id)
-    //         .then(function (onePost) {
-    //             let vote = {
-    //                 oneUpvote: onePost.upVote,
-    //                 oneDownvote: onePost.downVote
-    //             }
-    //             if (vote.oneDownvote.length > 0) {
-    //                 for (let i = 0; i < vote.oneDownvote.length; i++) {
-    //                     if (JSON.stringify(vote.oneDownvote[i]) === JSON.stringify(req.body.userId)) {
-    //                         flagUp = false
-    //                         break
-    //                     }
-    //                 }
-    //                 if (!flagUp) {
-    //                     res.status(400).json({
-    //                         message: `You already upvote this post`
-    //                     })
-    //                 } else {
-    //                     vote.oneDownvote.push(req.body.userId)
-    //                     return vote
-    //                 }
-    //             } else {
-    //                 vote.oneDownvote.push(req.body.userId)
-    //                 return vote
-    //             }
-    //         })
-    //         .then(function (vote) {
-    //             if (vote.oneUpvote.length > 0) {
-    //                 for (let i = 0; i < vote.oneUpvote.length; i++) {
-    //                     if (JSON.stringify(vote.oneUpvote[i]) === JSON.stringify(req.body.userId)) {
-    //                         vote.oneUpvote.splice(i, 1)
-    //                     }
-    //                 }
-    //             }
-    //             return question.findByIdAndUpdate(req.params.id, {
-    //                 upvote: vote.oneUpvote,
-    //                 downvote: vote.oneDownvote
-    //             })
-    //         })
-    //         .then(function (post) {
-    //             res.status(200).json(post)
-    //         })
-    //         .catch(function (err) {
-    //             res.status(500).json(err)
-    //         })
-    // }
+
     static upvote(req, res) {
         var validasi = jwt.verify(req.headers.token)
         var ID = ''
@@ -227,13 +179,17 @@ class Controller {
     }
 
     static addData(req, res) {
-
-        console.log('oooooooooooooooo');
+        var validasi = jwt.verify(req.headers.token)
+        // console.log('oooooooooooooooo');
+        // console.log(req.headers.token);
+        console.log(validasi);
 
         User.findOne({
                 email: validasi.email
             })
             .then(data => {
+                // console.log(data);
+
                 return Model.create({
                     title: req.body.title,
                     description: req.body.description,

@@ -69,8 +69,8 @@ export default {
       this.formAnswer = false;
     },
     loadData() {
-      // console.log("masokkkk sini");
-      // console.log(this.$route.params.QuestionId, "============");
+      console.log("masokkkkkkkkkkkkkkkkkkk sini");
+      console.log(this.$route.params.QuestionId, "============");
 
       this.votescount = "";
       var token = localStorage.getItem("token");
@@ -86,7 +86,8 @@ export default {
           // console.log("okkkkkkkkkkkkkkkkkkk");
           // console.log(data.data);
 
-          this.$store.state.votes = data.data.upVote.length;
+          this.$store.state.votes =
+            data.data.upVote.length - data.data.downVote.length;
           this.votescount = this.$store.state.votes;
         })
         .catch(({ response }) => {
@@ -108,9 +109,9 @@ export default {
         }
       })
         .then(data => {
+          this.loadData();
           swal(`vote`, "sukses !!!", "succes");
           // console.log(data.data);
-          this.loadData();
         })
         .catch(err => {
           swal(`user eror `, "anda sudah upvote !!!", "error");
@@ -124,23 +125,24 @@ export default {
         method: "post",
         headers: {
           token: token
+        },
+        data: {
+          questionId: this.data._id
         }
       })
         .then(data => {
-          swal(`downvote`, "sukses !!!", "succes");
-          // console.log(data.data);
           this.loadData();
-          // console.log("okokokokokok");
+          swal(`downvote`, "sukses !!!", "succes");
         })
         .catch(err => {
-          swal(`user eror `, "gagals !!!", "error");
+          swal(`user eror `, "anda sudah downvote !!!", "error");
         });
     }
   },
   mounted() {
-    this.loadData();
     this.formAnswer = false;
     this.$store.state.allUserData = false;
+    this.loadData();
   }
 };
 </script>
